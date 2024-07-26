@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Colorful Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(135deg, #f5a623, #f76b1c);
+            margin: 0;
+        }
+        .calculator {
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            width: 300px;
+        }
+        .display {
+            background-color: #222;
+            color: #fff;
+            font-size: 2em;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: right;
+            margin-bottom: 20px;
+        }
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+        .buttons button {
+            background-color: #f76b1c;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 20px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .buttons button:hover {
+            background-color: #f5a623;
+        }
+        .buttons .operator {
+            background-color: #1c87f7;
+        }
+        .buttons .operator:hover {
+            background-color: #1c87d7;
+        }
+        .buttons .equal {
+            background-color: #28a745;
+        }
+        .buttons .equal:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <div class="display" id="display">0</div>
+        <div class="buttons">
+            <button>7</button>
+            <button>8</button>
+            <button>9</button>
+            <button class="operator">/</button>
+            <button>4</button>
+            <button>5</button>
+            <button>6</button>
+            <button class="operator">*</button>
+            <button>1</button>
+            <button>2</button>
+            <button>3</button>
+            <button class="operator">-</button>
+            <button>0</button>
+            <button>.</button>
+            <button class="operator">+</button>
+            <button class="equal">=</button>
+        </div>
+    </div>
+
+    <script>
+        const display = document.getElementById('display');
+        const buttons = document.querySelectorAll('button');
+        let displayValue = '0';
+        let operator = null;
+        let firstOperand = null;
+        let waitingForSecondOperand = false;
+
+        function updateDisplay() {
+            display.textContent = displayValue;
+        }
+
+        function handleNumber(number) {
+            if (waitingForSecondOperand) {
+                displayValue = number;
+                waitingForSecondOperand = false;
+            } else {
+                displayValue = displayValue === '0' ? number : displayValue + number;
+            }
+        }
+
+        function handleOperator(nextOperator) {
+            const inputValue = parseFloat(displayValue);
+            if (operator && waitingForSecondOperand) {
+                operator = nextOperator;
+                return;
+            }
+
+            if (firstOperand === null && !isNaN(inputValue)) {
+                firstOperand = inputValue;
+            } else if (operator) {
+                const result = calculate(firstOperand, inputValue, operator);
+                displayValue = `${parseFloat(result.toFixed(7))}`;
+                firstOperand = result;
+            }
+
+            waitingForSecondOperand = true;
+            operator = nextOperator;
+        }
+
+        function calculate(first, second, operator) {
+            if (operator === '+') return first + second;
+            if (operator === '-') return first - second;
+            if (operator === '*') return first * second;
+            if (operator === '/') return first / second;
+            return second;
+        }
+
+        function resetCalculator() {
+            displayValue = '0';
+            firstOperand = null;
+            operator = null;
+            waitingForSecondOperand = false;
+        }
+
+        buttons.forEach(button => {
+            button.addEventListener('click', () => {
+                if (button.classList.contains('operator')) {
+                    handleOperator(button.textContent);
+                } else if (button.classList.contains('equal')) {
+                    handleOperator('=');
+                } else if (button.textContent === '.') {
+                    if (!displayValue.includes('.')) {
+                        displayValue += '.';
+                    }
+                } else {
+                    handleNumber(button.textContent);
+                }
+
+                updateDisplay();
+            });
+        });
+
+        updateDisplay();
+    </script>
+</body>
+</html>
